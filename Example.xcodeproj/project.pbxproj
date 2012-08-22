@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5219560715E557B700365324 /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5219560315E557B700365324 /* ViewController_iPad.xib */; };
+		5219560815E557B700365324 /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5219560515E557B700365324 /* ViewController_iPhone.xib */; };
 		5230F49615E42A3C00699116 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5230F49515E42A3C00699116 /* UIKit.framework */; };
 		5230F49815E42A3C00699116 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5230F49715E42A3C00699116 /* Foundation.framework */; };
 		5230F49A15E42A3C00699116 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5230F49915E42A3C00699116 /* CoreGraphics.framework */; };
@@ -15,14 +17,16 @@
 		5230F4A415E42A3C00699116 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5230F4A215E42A3C00699116 /* InfoPlist.strings */; };
 		5230F4A615E42A3C00699116 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5230F4A515E42A3C00699116 /* main.m */; };
 		5230F4AA15E42A3C00699116 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5230F4A915E42A3C00699116 /* AppDelegate.m */; };
-		5230F4AD15E42A3C00699116 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5230F4AB15E42A3C00699116 /* MainStoryboard_iPhone.storyboard */; };
-		5230F4B015E42A3C00699116 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5230F4AE15E42A3C00699116 /* MainStoryboard_iPad.storyboard */; };
 		5230F4B215E42A3C00699116 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5230F4B115E42A3C00699116 /* Shader.fsh */; };
 		5230F4B415E42A3C00699116 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5230F4B315E42A3C00699116 /* Shader.vsh */; };
 		5230F4B715E42A3C00699116 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5230F4B615E42A3C00699116 /* ViewController.m */; };
+		5230F4CF15E552D100699116 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5230F4CE15E552D100699116 /* AVFoundation.framework */; };
+		5230F4D215E552DB00699116 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5230F4D115E552DB00699116 /* CoreVideo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5219560415E557B700365324 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPad.xib; sourceTree = "<group>"; };
+		5219560615E557B700365324 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPhone.xib; sourceTree = "<group>"; };
 		5230F49115E42A3C00699116 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5230F49515E42A3C00699116 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		5230F49715E42A3C00699116 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -35,12 +39,12 @@
 		5230F4A715E42A3C00699116 /* Example-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Example-Prefix.pch"; sourceTree = "<group>"; };
 		5230F4A815E42A3C00699116 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		5230F4A915E42A3C00699116 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		5230F4AC15E42A3C00699116 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
-		5230F4AF15E42A3C00699116 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
 		5230F4B115E42A3C00699116 /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = Shaders/Shader.fsh; sourceTree = "<group>"; };
 		5230F4B315E42A3C00699116 /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = Shaders/Shader.vsh; sourceTree = "<group>"; };
 		5230F4B515E42A3C00699116 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		5230F4B615E42A3C00699116 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		5230F4CE15E552D100699116 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		5230F4D115E552DB00699116 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +52,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5230F4D215E552DB00699116 /* CoreVideo.framework in Frameworks */,
+				5230F4CF15E552D100699116 /* AVFoundation.framework in Frameworks */,
 				5230F49615E42A3C00699116 /* UIKit.framework in Frameworks */,
 				5230F49815E42A3C00699116 /* Foundation.framework in Frameworks */,
 				5230F49A15E42A3C00699116 /* CoreGraphics.framework in Frameworks */,
@@ -62,6 +68,8 @@
 		5230F48615E42A3C00699116 = {
 			isa = PBXGroup;
 			children = (
+				5230F4D115E552DB00699116 /* CoreVideo.framework */,
+				5230F4CE15E552D100699116 /* AVFoundation.framework */,
 				5230F49F15E42A3C00699116 /* Example */,
 				5230F49415E42A3C00699116 /* Frameworks */,
 				5230F49215E42A3C00699116 /* Products */,
@@ -93,8 +101,6 @@
 			children = (
 				5230F4A815E42A3C00699116 /* AppDelegate.h */,
 				5230F4A915E42A3C00699116 /* AppDelegate.m */,
-				5230F4AB15E42A3C00699116 /* MainStoryboard_iPhone.storyboard */,
-				5230F4AE15E42A3C00699116 /* MainStoryboard_iPad.storyboard */,
 				5230F4B115E42A3C00699116 /* Shader.fsh */,
 				5230F4B315E42A3C00699116 /* Shader.vsh */,
 				5230F4B515E42A3C00699116 /* ViewController.h */,
@@ -107,6 +113,8 @@
 		5230F4A015E42A3C00699116 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				5219560315E557B700365324 /* ViewController_iPad.xib */,
+				5219560515E557B700365324 /* ViewController_iPhone.xib */,
 				5230F4A115E42A3C00699116 /* Example-Info.plist */,
 				5230F4A215E42A3C00699116 /* InfoPlist.strings */,
 				5230F4A515E42A3C00699116 /* main.m */,
@@ -167,10 +175,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5230F4A415E42A3C00699116 /* InfoPlist.strings in Resources */,
-				5230F4AD15E42A3C00699116 /* MainStoryboard_iPhone.storyboard in Resources */,
-				5230F4B015E42A3C00699116 /* MainStoryboard_iPad.storyboard in Resources */,
 				5230F4B215E42A3C00699116 /* Shader.fsh in Resources */,
 				5230F4B415E42A3C00699116 /* Shader.vsh in Resources */,
+				5219560715E557B700365324 /* ViewController_iPad.xib in Resources */,
+				5219560815E557B700365324 /* ViewController_iPhone.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -190,28 +198,28 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		5219560315E557B700365324 /* ViewController_iPad.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5219560415E557B700365324 /* en */,
+			);
+			name = ViewController_iPad.xib;
+			sourceTree = "<group>";
+		};
+		5219560515E557B700365324 /* ViewController_iPhone.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5219560615E557B700365324 /* en */,
+			);
+			name = ViewController_iPhone.xib;
+			sourceTree = "<group>";
+		};
 		5230F4A215E42A3C00699116 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				5230F4A315E42A3C00699116 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		5230F4AB15E42A3C00699116 /* MainStoryboard_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5230F4AC15E42A3C00699116 /* en */,
-			);
-			name = MainStoryboard_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		5230F4AE15E42A3C00699116 /* MainStoryboard_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5230F4AF15E42A3C00699116 /* en */,
-			);
-			name = MainStoryboard_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -309,6 +317,7 @@
 				5230F4BC15E42A3C00699116 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
