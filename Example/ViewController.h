@@ -2,7 +2,7 @@
 //  ViewController.h
 //  Example
 //
-//  Created by Ronald Garay on 8/21/12.
+//  Created by Ronald Garay on 8/23/12.
 //  Copyright (c) 2012 Ronald Garay. All rights reserved.
 //
 
@@ -10,6 +10,6 @@
 #import <GLKit/GLKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface ViewController : GLKViewController <AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface ViewController : GLKViewController <AVCaptureAudioDataOutputSampleBufferDelegate>
 
 @end

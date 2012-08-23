@@ -2,66 +2,30 @@
 //  ViewController.m
 //  Example
 //
-//  Created by Ronald Garay on 8/21/12.
+//  Created by Ronald Garay on 8/23/12.
 //  Copyright (c) 2012 Ronald Garay. All rights reserved.
 //
 
 #import "ViewController.h"
 
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-
-// Uniform index.
-enum
-{
-    UNIFORM_Y,
-    UNIFORM_U,
-    UNIFORM_V,
-    NUM_UNIFORMS
-};
-GLint uniforms[NUM_UNIFORMS];
-
-// Attribute index.
-enum
-{
-    ATTRIB_VERTEX,
-    ATTRIB_NORMAL,
-    NUM_ATTRIBUTES
-};
-
-
 @interface ViewController () {
-    
+    EAGLContext *_context;
     GLuint _program;
     
-    CGFloat _screenWidth;
-    CGFloat _screenHeight;
-    
-    size_t _textureWidth;
-    size_t _textureHeight;
-    
-    unsigned int _meshFactor;
-    
-    EAGLContext *_context;
-    
-    CVOpenGLESTextureRef _lumaTexture;
-    CVOpenGLESTextureRef _CbTexture;
-    CVOpenGLESTextureRef _CrTexture;
-    
-    NSString *_sessionPreset;
-    
     AVCaptureSession *_session;
-    CVOpenGLESTextureCacheRef _videoTextureCache;
+    AVCaptureVideoPreviewLayer *_preview;
 }
 
-- (void)cleanUpTextures;
 - (void)setupAVCapture;
-- (void)tearDownAVCapture;
-
 - (void)setupGL;
-- (void)tearDownGL;
+- (void)setupBuffers;
 
+- (void)teardownAVCapture;
+- (void)teardownGL;
+- (void)cleanUpTextures;
+
+- (BOOL)compileShader:(GLuint *)shader withType:(GLenum)type andFile:(NSString *)file;
 - (BOOL)loadShaders;
-- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file;
 - (BOOL)linkProgram:(GLuint)prog;
 
 @end
@@ -71,78 +35,22 @@ enum
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-
-    if (!_context) {
-        NSLog(@"Failed to create ES context");
-    }
-    
-    GLKView *view = (GLKView *)self.view;
-    view.context = _context;
-    self.preferredFramesPerSecond = 60;
-    
-    _screenWidth = [UIScreen mainScreen].bounds.size.width;
-    _screenHeight = [UIScreen mainScreen].bounds.size.height;
-    view.contentScaleFactor = [UIScreen mainScreen].scale;
-    
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        _sessionPreset = AVCaptureSessionPreset1280x720;
-    else
-        _sessionPreset = AVCaptureSessionPreset640x480;
-    
-    [self setupGL];
-    
-    [self setupAVCapture];
+	// Do any additional setup after loading the view, typically from a nib.
 }
 
 - (void)viewDidUnload
-{    
-    [super viewDidUnload];
-    
-    [self tearDownAVCapture];
-    
-    [self tearDownGL];
-    
-    if ([EAGLContext currentContext] == _context)
-        [EAGLContext setCurrentContext:nil];
-	
-    _context = nil;
-}
-
-- (void)didReceiveMemoryWarning
 {
-    [super didReceiveMemoryWarning];
-    // Release any cached data, images, etc. that aren't in use.
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    if (interfaceOrientation == UIInterfaceOrientationPortrait)
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+    } else {
         return YES;
-    else 
-        return NO;
-    
-}
-
-- (void)cleanUpTextures
-{
-    if (_lumaTexture) {
-        CFRelease(_lumaTexture);
-        _lumaTexture = NULL;
     }
-    
-    if (_CbTexture) {
-        CFRelease(_CbTexture);
-        _CbTexture = NULL;
-    }
-    
-    if (_CrTexture) {
-        CFRelease(_CrTexture);
-        _CrTexture = NULL;
-    }
-    
-    CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
@@ -152,225 +60,94 @@ enum
 
 - (void)setupAVCapture
 {
-    CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, (__bridge void *)_context, NULL, &_videoTextureCache);
-    
-    if (err) {
-        NSLog(@"Error at CVOpenGLESTextureCacheCreate %d", err);
-        return;
-    }
-    
     _session = [[AVCaptureSession alloc] init];
     [_session beginConfiguration];
     
-    [_session setSessionPreset:_sessionPreset];
+    [_session setSessionPreset:AVCaptureSessionPresetMedium];
     
-    AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    AVCaptureDevice *videoDevice;
     
-    if (!videoDevice)
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    
+    for (AVCaptureDevice *device in devices) {
+        if (device.position == AVCaptureDevicePositionFront) {
+            videoDevice = device;
+            break;
+        }
+    }
+    
+    if (!videoDevice) {
         assert(0);
+    }
     
     NSError *error;
     
     AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
     
-    if (error)
+    if (error) {
         assert(0);
+    }
     
     [_session addInput:input];
     
-    AVCaptureVideoDataOutput *dataOutput = [[AVCaptureVideoDataOutput alloc] init];
-    [dataOutput setAlwaysDiscardsLateVideoFrames:YES];
+    AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
+    [output setAlwaysDiscardsLateVideoFrames:YES];
     
-    [dataOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8PlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+    [output setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
     
-    [dataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
+    [output setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
     
-    [_session addOutput:dataOutput];
+    [_session addOutput:output];
     [_session commitConfiguration];
     
     UIView *previewView = [[UIView alloc] initWithFrame:CGRectMake(20, 20, 200, 200)];
     
     AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:_session];
-    previewLayer.frame = CGRectMake(20, 20, 200, 200);
+    
+    previewLayer.frame = CGRectMake(0, 0, 200, 200);
     [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
     
     [previewView.layer addSublayer:previewLayer];
     [self.view addSubview:previewView];
-    
-    [_session startRunning];
-}
-
-- (void)tearDownAVCapture
-{
-    [self cleanUpTextures];
-    
-    CFRelease(_videoTextureCache);
 }
 
 - (void)setupGL
 {
-    [EAGLContext setCurrentContext:_context];
     
-    [self loadShaders];
-    
-    glUseProgram(_program);
-    
-    glUniform1i(uniforms[UNIFORM_Y], 0);
-    glUniform1i(uniforms[UNIFORM_U], 1);
-    glUniform1i(uniforms[UNIFORM_V], 2);
 }
 
-- (void)tearDownGL
+- (void)setupBuffers
 {
-    [EAGLContext setCurrentContext:_context];
     
-    if (_program) {
-        glDeleteProgram(_program);
-        _program = 0;
-    }
 }
 
-#pragma mark - GLKView and GLKViewController delegate methods
-
-- (void)update
+- (void)teardownAVCapture
 {
-
+    
 }
 
-- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
+- (void)teardownGL
 {
-  
+    
 }
 
-#pragma mark -  OpenGL ES 2 shader compilation
-
-- (BOOL)loadShaders
+- (void)cleanUpTextures
 {
-    GLuint vertShader, fragShader;
-    NSString *vertShaderPathname, *fragShaderPathname;
     
-    // Create shader program.
-    _program = glCreateProgram();
-    
-    // Create and compile vertex shader.
-    vertShaderPathname = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"vsh"];
-    if (![self compileShader:&vertShader type:GL_VERTEX_SHADER file:vertShaderPathname]) {
-        NSLog(@"Failed to compile vertex shader");
-        return NO;
-    }
-    
-    // Create and compile fragment shader.
-    fragShaderPathname = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"fsh"];
-    if (![self compileShader:&fragShader type:GL_FRAGMENT_SHADER file:fragShaderPathname]) {
-        NSLog(@"Failed to compile fragment shader");
-        return NO;
-    }
-    
-    // Attach vertex shader to program.
-    glAttachShader(_program, vertShader);
-    
-    // Attach fragment shader to program.
-    glAttachShader(_program, fragShader);
-    
-    // Bind attribute locations.
-    // This needs to be done prior to linking.
-    glBindAttribLocation(_program, GLKVertexAttribPosition, "position");
-    glBindAttribLocation(_program, GLKVertexAttribNormal, "textCoord");
-    
-    // Link program.
-    if (![self linkProgram:_program]) {
-        NSLog(@"Failed to link program: %d", _program);
-        
-        if (vertShader) {
-            glDeleteShader(vertShader);
-            vertShader = 0;
-        }
-        if (fragShader) {
-            glDeleteShader(fragShader);
-            fragShader = 0;
-        }
-        if (_program) {
-            glDeleteProgram(_program);
-            _program = 0;
-        }
-        
-        return NO;
-    }
-    
-    // Get uniform locations.
-    uniforms[UNIFORM_Y] = glGetUniformLocation(_program, "SamplerY");
-    uniforms[UNIFORM_U] = glGetUniformLocation(_program, "SamplerU");
-    uniforms[UNIFORM_V] = glGetUniformLocation(_program, "SamplerV");
-    
-    // Release vertex and fragment shaders.
-    if (vertShader) {
-        glDetachShader(_program, vertShader);
-        glDeleteShader(vertShader);
-    }
-    if (fragShader) {
-        glDetachShader(_program, fragShader);
-        glDeleteShader(fragShader);
-    }
-    
+}
+
+- (BOOL)compileShader:(GLuint *)shader withType:(GLenum)type andFile:(NSString *)file
+{
     return YES;
 }
 
-- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file
+- (BOOL)loadShaders
 {
-    GLint status;
-    const GLchar *source;
-    
-    source = (GLchar *)[[NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil] UTF8String];
-    if (!source) {
-        NSLog(@"Failed to load vertex shader");
-        return NO;
-    }
-    
-    *shader = glCreateShader(type);
-    glShaderSource(*shader, 1, &source, NULL);
-    glCompileShader(*shader);
-    
-#if defined(DEBUG)
-    GLint logLength;
-    glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0) {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetShaderInfoLog(*shader, logLength, &logLength, log);
-        NSLog(@"Shader compile log:\n%s", log);
-        free(log);
-    }
-#endif
-    
-    glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
-    if (status == 0) {
-        glDeleteShader(*shader);
-        return NO;
-    }
-    
     return YES;
 }
 
 - (BOOL)linkProgram:(GLuint)prog
 {
-    GLint status;
-    glLinkProgram(prog);
-    
-#if defined(DEBUG)
-    GLint logLength;
-    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0) {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetProgramInfoLog(prog, logLength, &logLength, log);
-        NSLog(@"Program link log:\n%s", log);
-        free(log);
-    }
-#endif
-    
-    glGetProgramiv(prog, GL_LINK_STATUS, &status);
-    if (status == 0) {
-        return NO;
-    }
-    
     return YES;
 }
 

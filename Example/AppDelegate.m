@@ -2,11 +2,13 @@
 //  AppDelegate.m
 //  Example
 //
-//  Created by Ronald Garay on 8/21/12.
+//  Created by Ronald Garay on 8/23/12.
 //  Copyright (c) 2012 Ronald Garay. All rights reserved.
 //
 
 #import "AppDelegate.h"
+
+#import "ViewController.h"
 
 @implementation AppDelegate
 
@@ -26,7 +28,7 @@
     [self.window makeKeyAndVisible];
     return YES;
 }
-							
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
