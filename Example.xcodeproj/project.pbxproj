@@ -21,6 +21,8 @@
 		5240239015E6A425006FC503 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240238F15E6A425006FC503 /* AVFoundation.framework */; };
 		5240239215E6A431006FC503 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240239115E6A431006FC503 /* OpenGLES.framework */; };
 		5240239415E6A440006FC503 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240239315E6A43F006FC503 /* CoreVideo.framework */; };
+		5240239615E6BAAD006FC503 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240239515E6BAAD006FC503 /* GLKit.framework */; };
+		5240239815E6BAB3006FC503 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240239715E6BAB3006FC503 /* CoreMedia.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +45,8 @@
 		5240238F15E6A425006FC503 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		5240239115E6A431006FC503 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		5240239315E6A43F006FC503 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		5240239515E6BAAD006FC503 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		5240239715E6BAB3006FC503 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +54,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5240239815E6BAB3006FC503 /* CoreMedia.framework in Frameworks */,
+				5240239615E6BAAD006FC503 /* GLKit.framework in Frameworks */,
 				5240239415E6A440006FC503 /* CoreVideo.framework in Frameworks */,
 				5240239215E6A431006FC503 /* OpenGLES.framework in Frameworks */,
 				5240239015E6A425006FC503 /* AVFoundation.framework in Frameworks */,
@@ -82,6 +88,8 @@
 		5240236415E699F7006FC503 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5240239515E6BAAD006FC503 /* GLKit.framework */,
+				5240239715E6BAB3006FC503 /* CoreMedia.framework */,
 				5240239315E6A43F006FC503 /* CoreVideo.framework */,
 				5240239115E6A431006FC503 /* OpenGLES.framework */,
 				5240238F15E6A425006FC503 /* AVFoundation.framework */,
