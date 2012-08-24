@@ -129,8 +129,8 @@
 		5240238A15E6A3D2006FC503 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
-				5240238B15E6A3DD006FC503 /* Shader.vsh */,
 				5240238D15E6A3E7006FC503 /* Shader.fsh */,
+				5240238B15E6A3DD006FC503 /* Shader.vsh */,
 			);
 			name = Shaders;
 			sourceTree = "<group>";
