@@ -27,11 +27,16 @@ enum
     NUM_ATTRIBUTES
 };
 
+typedef struct {
+    float Position[3];
+    float Color[4];
+} Vertex;
+
 @interface ViewController () {
     EAGLContext *_context;
     GLuint _program;
-    
     GLuint yTexture, uTexture, vTexture;
+    GLuint _position, _coordinates;
     
     size_t planeSizes[2];
     size_t planeBPRs[2];
@@ -206,7 +211,10 @@ enum
     
     glUseProgram(_program);
     
-    /*** NEED TO SET UP UNIFORMS/TEXTURES OR ANYTHING OF THAT SORT ***/
+    _position = glGetAttribLocation(_program, "position");
+    _coordinates = glGetAttribLocation(_program, "textCoordIn");
+    glEnableVertexAttribArray(_position);
+    glEnableVertexAttribArray(_coordinates);
 }
 
 - (void)setupTextures
@@ -370,7 +378,8 @@ enum
     
     glAttachShader(_program, fragShader);
     
-    /*** BIND ATTRIBUTES ***/
+    glBindAttribLocation(_program, ATTRIB_VERTEX, "position");
+    glBindAttribLocation(_program, ATTRIB_TEXCOORD, "texCoord");
     
     if (![self linkProgram:_program]) {
         NSLog(@"Failed to link program: %d", _program);
@@ -433,7 +442,13 @@ enum
 
 - (void)render
 {
-    // Y data
+    glViewport(100, 300, planeWidths[0], planeHeights[0]);
+    
+    glVertexAttribPointer(_position, 4, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), 0);
+    glVertexAttribPointer(_coordinates, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), (GLvoid*) (sizeof(float) * 4));
+    
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, yTexture);
     glUniform1i(uniforms[UNIFORM_Y], 1);

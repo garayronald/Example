@@ -2,7 +2,7 @@ attribute vec4 postion;
 attribute vec2 texCoordIn;
 
 varying vec2 texCoordOut;
-varying vec2 texCoordOut_UV;4
+varying vec2 texCoordOut_UV;
 
 uniform mat4 projection;
 uniform mat4 modelView;
