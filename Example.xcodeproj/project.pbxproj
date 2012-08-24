@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		522FC2BE15E7F0BB007253B3 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5240238D15E6A3E7006FC503 /* Shader.fsh */; };
+		522FC2BF15E7F0BB007253B3 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5240238B15E6A3DD006FC503 /* Shader.vsh */; };
 		5240236615E699F7006FC503 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240236515E699F7006FC503 /* UIKit.framework */; };
 		5240236815E699F7006FC503 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240236715E699F7006FC503 /* Foundation.framework */; };
 		5240236A15E699F7006FC503 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240236915E699F7006FC503 /* CoreGraphics.framework */; };
@@ -16,8 +18,6 @@
 		5240237915E699F7006FC503 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5240237815E699F7006FC503 /* ViewController.m */; };
 		5240237C15E699F7006FC503 /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5240237A15E699F7006FC503 /* ViewController_iPhone.xib */; };
 		5240237F15E699F7006FC503 /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5240237D15E699F7006FC503 /* ViewController_iPad.xib */; };
-		5240238C15E6A3DD006FC503 /* Shader.vsh in Sources */ = {isa = PBXBuildFile; fileRef = 5240238B15E6A3DD006FC503 /* Shader.vsh */; };
-		5240238E15E6A3E7006FC503 /* Shader.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 5240238D15E6A3E7006FC503 /* Shader.fsh */; };
 		5240239015E6A425006FC503 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240238F15E6A425006FC503 /* AVFoundation.framework */; };
 		5240239215E6A431006FC503 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240239115E6A431006FC503 /* OpenGLES.framework */; };
 		5240239415E6A440006FC503 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5240239315E6A43F006FC503 /* CoreVideo.framework */; };
@@ -186,6 +186,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				522FC2BE15E7F0BB007253B3 /* Shader.fsh in Resources */,
+				522FC2BF15E7F0BB007253B3 /* Shader.vsh in Resources */,
 				5240237015E699F7006FC503 /* InfoPlist.strings in Resources */,
 				5240237C15E699F7006FC503 /* ViewController_iPhone.xib in Resources */,
 				5240237F15E699F7006FC503 /* ViewController_iPad.xib in Resources */,
@@ -202,8 +204,6 @@
 				5240237215E699F7006FC503 /* main.m in Sources */,
 				5240237615E699F7006FC503 /* AppDelegate.m in Sources */,
 				5240237915E699F7006FC503 /* ViewController.m in Sources */,
-				5240238C15E6A3DD006FC503 /* Shader.vsh in Sources */,
-				5240238E15E6A3E7006FC503 /* Shader.fsh in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,10 +291,14 @@
 		5240238315E699F7006FC503 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: ronald garay (ZGXVG77Z4J)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: ronald garay (ZGXVG77Z4J)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Example/Example-Prefix.pch";
 				INFOPLIST_FILE = "Example/Example-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "107D2B1F-DC95-40CE-85AF-0B69F3823342";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "107D2B1F-DC95-40CE-85AF-0B69F3823342";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -302,10 +306,14 @@
 		5240238415E699F7006FC503 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: ronald garay (ZGXVG77Z4J)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: ronald garay (ZGXVG77Z4J)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Example/Example-Prefix.pch";
 				INFOPLIST_FILE = "Example/Example-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "107D2B1F-DC95-40CE-85AF-0B69F3823342";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "107D2B1F-DC95-40CE-85AF-0B69F3823342";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

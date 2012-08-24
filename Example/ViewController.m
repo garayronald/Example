@@ -11,13 +11,11 @@
 //Uniforms for openGL
 enum
 {
-    UNIFORM_Y,
-    UNIFORM_U,
-    UNIFORM_V,
-    NUM_UNIFORMS
+    SAMPLE_Y,
+    SAMPLE_U,
+    SAMPLE_V,
+    NUM_SAMPLES
 };
-
-GLint uniforms[NUM_UNIFORMS];
 
 //Attributes for openGL
 enum
@@ -27,23 +25,31 @@ enum
     NUM_ATTRIBUTES
 };
 
-typedef struct {
-    float Position[3];
-    float Color[4];
-} Vertex;
+static const float kVertices[8] = {
+    -1.f, 1.f,
+    -1.f, -1.f,
+    1.f, 1.f,
+    1.f, -1.f,
+};
+
+static const float kTextureCoords[8] = {
+    0, 0,
+    0, 1,
+    1, 0,
+    1, 1,
+};
 
 @interface ViewController () {
     EAGLContext *_context;
     GLuint _program;
-    GLuint yTexture, uTexture, vTexture;
-    GLuint _position, _coordinates;
+    GLuint attributes[NUM_ATTRIBUTES];
+    GLuint _textures[NUM_SAMPLES];
+    GLint uniforms[NUM_SAMPLES];
     
     size_t planeSizes[2];
     size_t planeBPRs[2];
     size_t planeWidths[2];
     size_t planeHeights[2];
-    
-    uint8_t *yChannel, *cBChannel, *cRChannel;
     
     AVCaptureSession *_session;
     AVCaptureVideoPreviewLayer *_preview;
@@ -52,16 +58,13 @@ typedef struct {
 - (void)setupAVCapture;
 - (void)setupGL;
 - (void)setupTextures;
-
 - (void)teardownAVCapture;
 - (void)teardownGL;
-- (void)cleanUpTextures;
-
+- (void)teardownTextures;
+- (void)render;
 - (BOOL)compileShader:(GLuint *)shader withType:(GLenum)type andFile:(NSString *)file;
 - (BOOL)loadShaders;
 - (BOOL)linkProgram:(GLuint)prog;
-
-- (void)render;
 
 @end
 
@@ -77,9 +80,9 @@ typedef struct {
         NSLog(@"Failed to create ES context");
     }
     
-    GLKView *view = (GLKView *)self.view;
-    view.context = _context;
-    self.preferredFramesPerSecond = 60;
+    //GLKView *view = (GLKView *)self.view;
+    //view.context = _context;
+    //self.preferredFramesPerSecond = 60;
     
     [self setupGL];
     
@@ -121,12 +124,12 @@ typedef struct {
     planeSizes[0] = planeBPRs[0] * planeHeights[0];
     planeSizes[1] = planeBPRs[1] * planeHeights[1];
     
-    yChannel = CVPixelBufferGetBaseAddressOfPlane(pixelBuff, 0);
+    uint8_t *yChannel = CVPixelBufferGetBaseAddressOfPlane(pixelBuff, 0);
     
     uint8_t *cbCrChannel = CVPixelBufferGetBaseAddressOfPlane(pixelBuff, 1);
     
-    cBChannel = (uint8_t *)malloc(planeSizes[1]/2);
-    cRChannel = (uint8_t *)malloc(planeSizes[1]/2);
+    uint8_t *cBChannel = (uint8_t *)malloc(planeSizes[1]/2);
+    uint8_t *cRChannel = (uint8_t *)malloc(planeSizes[1]/2);
     
     uint8_t *u = cBChannel;
     uint8_t *v = cRChannel;
@@ -142,10 +145,9 @@ typedef struct {
         cbCrChannel++;
     }
     
-    CVPixelBufferUnlockBaseAddress(pixelBuff, 0);
+    [self renderWithDataY:yChannel dataU:cBChannel dataV:cRChannel];
     
-    [self setupTextures];
-    [self render];
+    CVPixelBufferUnlockBaseAddress(pixelBuff, 0);
 }
 
 - (void)setupAVCapture
@@ -203,106 +205,41 @@ typedef struct {
     [_session startRunning];
 }
 
+- (void)teardownAVCapture
+{
+    
+}
+
 - (void)setupGL
 {
     [EAGLContext setCurrentContext:_context];
     
+    [self setupTextures];
+    
     [self loadShaders];
     
-    glUseProgram(_program);
+    uniforms[SAMPLE_Y] = glGetUniformLocation(_program, "sampler_y");
+    glUniform1i(uniforms[SAMPLE_Y], 0);
     
-    _position = glGetAttribLocation(_program, "position");
-    _coordinates = glGetAttribLocation(_program, "textCoordIn");
-    glEnableVertexAttribArray(_position);
-    glEnableVertexAttribArray(_coordinates);
-}
-
-- (void)setupTextures
-{
-    // Y Texture
-    if (yTexture) glDeleteTextures(1, &yTexture);
+    uniforms[SAMPLE_U] = glGetUniformLocation(_program, "sampler_u");
+    glUniform1i(uniforms[SAMPLE_U], 0);
     
-    glActiveTexture(GL_TEXTURE1);
-    glGenTextures(1, &yTexture);
-    glBindTexture(GL_TEXTURE_2D, yTexture);
+    uniforms[SAMPLE_V] = glGetUniformLocation(_program, "sampler_v");
+    glUniform1i(uniforms[SAMPLE_V], 0);
     
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // This is necessary for non-power-of-two textures
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glEnable(GL_TEXTURE_2D);
+    attributes[ATTRIB_VERTEX] = glGetAttribLocation(_program, "position");
+    glEnableVertexAttribArray(attributes[ATTRIB_VERTEX]);
+    glVertexAttribPointer(attributes[ATTRIB_VERTEX], 2, GL_FLOAT, GL_FALSE, 0, kVertices);
     
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_LUMINANCE,
-                 planeWidths[0],
-                 planeHeights[0],
-                 0,
-                 GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE,
-                 NULL);
-    
-    // U Texture
-    if (uTexture) glDeleteTextures(1, &uTexture);
-    
-    glActiveTexture(GL_TEXTURE1);
-    glGenTextures(1, &uTexture);
-    glBindTexture(GL_TEXTURE_2D, uTexture);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // This is necessary for non-power-of-two textures
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glEnable(GL_TEXTURE_2D);
-    
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_LUMINANCE,
-                 planeWidths[1]/2,
-                 planeHeights[1]/2,
-                 0,
-                 GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE,
-                 NULL);
-    
-    // V Texture
-    if (vTexture) glDeleteTextures(1, &vTexture);
-    
-    glActiveTexture(GL_TEXTURE1);
-    glGenTextures(1, &vTexture);
-    glBindTexture(GL_TEXTURE_2D, vTexture);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // This is necessary for non-power-of-two textures
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glEnable(GL_TEXTURE_2D);
-    
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_LUMINANCE,
-                 planeWidths[1]/2,
-                 planeHeights[1]/2,
-                 0,
-                 GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE,
-                 NULL);
-}
-
-- (void)teardownAVCapture
-{
-    [self cleanUpTextures];
-    
+    attributes[ATTRIB_TEXCOORD] = glGetAttribLocation(_program, "texCoordIn");
+    glEnableVertexAttribArray(attributes[ATTRIB_TEXCOORD]);
+    glVertexAttribPointer(attributes[ATTRIB_TEXCOORD], 2, GL_FLOAT, GL_FALSE, 0,
+                          kTextureCoords);
 }
 
 - (void)teardownGL
 {
     [EAGLContext setCurrentContext:_context];
-    
-    /*** DELETE ANY BUFFER ETC. ***/
     
     if (_program) {
         glDeleteProgram(_program);
@@ -310,9 +247,87 @@ typedef struct {
     }
 }
 
-- (void)cleanUpTextures
+- (void)setupTextures
 {
+    //Create 3 textues
+    glGenTextures(3, _textures);
+    glActiveTexture(GL_TEXTURE0);
     
+    // Y texture
+    glBindTexture(GL_TEXTURE_2D, _textures[SAMPLE_Y]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glEnable(GL_TEXTURE_2D);
+    
+    // U texture
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, _textures[SAMPLE_U]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glEnable(GL_TEXTURE_2D);
+    
+    // V texture
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, _textures[SAMPLE_V]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glEnable(GL_TEXTURE_2D);
+}
+
+- (void)teardownTextures
+{
+
+}
+
+- (void)renderWithDataY:(uint8_t *)y_data dataU:(uint8_t *)u_data dataV:(uint8_t *)v_data
+{
+    // Y data
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, _textures[SAMPLE_Y]);
+    glUniform1i(_textures[SAMPLE_Y], 0);
+    
+    glTexSubImage2D(
+                    GL_TEXTURE_2D,
+                    0,
+                    0,
+                    0,
+                    planeBPRs[0],            // source width
+                    planeHeights[0],            // source height
+                    GL_LUMINANCE,
+                    GL_UNSIGNED_BYTE,
+                    y_data);
+    
+    // U data
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, _textures[SAMPLE_U]);
+    glUniform1i(_textures[SAMPLE_U], 1);
+    
+    glTexSubImage2D(
+                    GL_TEXTURE_2D,
+                    0,
+                    0,
+                    0,
+                    planeBPRs[1]/2,            // source width
+                    planeHeights[1]/2,            // source height
+                    GL_LUMINANCE,
+                    GL_UNSIGNED_BYTE,
+                    u_data);
+    
+    // V data
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _textures[SAMPLE_V]);
+    glUniform1i(_textures[SAMPLE_V], 2);
+    
+    glTexSubImage2D(
+                    GL_TEXTURE_2D,
+                    0,
+                    0,
+                    0,
+                    planeBPRs[1]/2,            // source width
+                    planeHeights[1]/2,            // source height
+                    GL_LUMINANCE,
+                    GL_UNSIGNED_BYTE,
+                    v_data);
 }
 
 - (BOOL)compileShader:(GLuint *)shader withType:(GLenum)type andFile:(NSString *)file
@@ -321,30 +336,18 @@ typedef struct {
     const GLchar *source;
     
     source = (GLchar *)[[NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil] UTF8String];
-    
     if (!source) {
         NSLog(@"Failed to load vertex shader");
         return NO;
     }
     
     *shader = glCreateShader(type);
+    
     glShaderSource(*shader, 1, &source, NULL);
+    
     glCompileShader(*shader);
-/*
-#if defined(DEBUG)
-    GLint loglength;
-    glGetShaderiv(*shader, loglength, &loglength);
     
-    if(loglength > 0) {
-        GLchar *log = (GLchar *)malloc(loglength);
-        glGetShaderInfoLog(*shader, loglength, &loglength, log);
-        NSLog(@"Shader compile log:\n%s",log);
-        free(log);
-    }
-#endif
-*/
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
-    
     if (status == 0) {
         glDeleteShader(*shader);
         return NO;
@@ -356,60 +359,44 @@ typedef struct {
 - (BOOL)loadShaders
 {
     GLuint vertShader, fragShader;
-    NSString *vertPath, *fragPath;
+    NSString *vertShaderPath, *fragShaderPath;
     
+    // Create shader program.
     _program = glCreateProgram();
     
-    vertPath = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"vsh"];
+    // Create and compile vertex shader.
+    vertShaderPath = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"vsh"];
     
-    if (![self compileShader:&vertShader withType:GL_VERTEX_SHADER andFile:vertPath]) {
+    if (![self compileShader:&vertShader withType:GL_VERTEX_SHADER andFile:vertShaderPath]) {
         NSLog(@"Failed to compile vertex shader");
         return NO;
     }
     
-    fragPath = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"fsh"];
-    
-    if (![self compileShader:&fragShader withType:GL_FRAGMENT_SHADER andFile:fragPath]) {
-        NSLog(@"Failed to compile fragment shader");
-        return NO;
-    }
-    
+    // Attach vertex shader to program.
     glAttachShader(_program, vertShader);
     
-    glAttachShader(_program, fragShader);
-    
-    glBindAttribLocation(_program, ATTRIB_VERTEX, "position");
-    glBindAttribLocation(_program, ATTRIB_TEXCOORD, "texCoord");
-    
-    if (![self linkProgram:_program]) {
-        NSLog(@"Failed to link program: %d", _program);
-        
-        if (vertShader) {
-            glDeleteShader(vertShader);
-            vertShader = 0;
-        }
-        if (fragShader) {
-            glDeleteShader(fragShader);
-            fragShader = 0;
-        }
-        if (_program) {
-            glDeleteProgram(_program);
-            _program = 0;
-        }
-        
-        return NO;
-    }
-    
-    /*** GET UNIFORM/TEXTURE LOCATION ***/
-    
+    // Release vertex shaders.
     if (vertShader) {
         glDetachShader(_program, vertShader);
         glDeleteShader(vertShader);
     }
+    
+    // Create and compile fragment shader.
+    fragShaderPath = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"fsh"];
+    
+    if (![self compileShader:&fragShader withType:GL_FRAGMENT_SHADER andFile:fragShaderPath]) {
+        NSLog(@"Failed to compile fragment shader");
+        return NO;
+    }
+    
+    // Release fragment shaders.
     if (fragShader) {
         glDetachShader(_program, fragShader);
         glDeleteShader(fragShader);
     }
+    
+    // Attach fragment shader to program.
+    glAttachShader(_program, fragShader);
     
     return YES;
 }
@@ -418,84 +405,13 @@ typedef struct {
 {
     GLint status;
     glLinkProgram(prog);
-/*
-#if defined(DEBUG)
-    GLint logLength;
-    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logLength);
     
-    if (logLength > 0) {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetProgramInfoLog(prog, logLength, &logLength, log);
-        NSLog(@"Program link log:\n%s", log);
-        free(log);
-    }
-#endif
-*/    
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
-    
     if (status == 0) {
         return NO;
     }
     
     return YES;
-}
-
-- (void)render
-{
-    glViewport(100, 300, planeWidths[0], planeHeights[0]);
-    
-    glVertexAttribPointer(_position, 4, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), 0);
-    glVertexAttribPointer(_coordinates, 2, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), (GLvoid*) (sizeof(float) * 4));
-    
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, yTexture);
-    glUniform1i(uniforms[UNIFORM_Y], 1);
-    
-    glTexSubImage2D(
-                    GL_TEXTURE_2D,
-                    0,
-                    0,
-                    0,
-                    planeWidths[0],            // source width
-                    planeHeights[0],            // source height
-                    GL_LUMINANCE,
-                    GL_UNSIGNED_BYTE,
-                    yChannel);
-    
-    // U data
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, uTexture);
-    glUniform1i(uniforms[UNIFORM_U], 2);
-    
-    glTexSubImage2D(
-                    GL_TEXTURE_2D,
-                    0,
-                    0,
-                    0,
-                    planeWidths[1]/2,            // source width
-                    planeHeights[1]/2,            // source height
-                    GL_LUMINANCE,
-                    GL_UNSIGNED_BYTE,
-                    cBChannel);
-    
-
-    // V data
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, vTexture);
-    glUniform1i(uniforms[UNIFORM_V], 3);
-    
-    glTexSubImage2D(
-                    GL_TEXTURE_2D,
-                    0,
-                    0,
-                    0,
-                    planeWidths[1]/2,            // source width
-                    planeHeights[1]/2,            // source height
-                    GL_LUMINANCE,
-                    GL_UNSIGNED_BYTE,
-                    cRChannel);
 }
 
 @end
