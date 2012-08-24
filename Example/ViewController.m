@@ -116,12 +116,12 @@ enum
     planeSizes[0] = planeBPRs[0] * planeHeights[0];
     planeSizes[1] = planeBPRs[1] * planeHeights[1];
     
-    *yChannel = CVPixelBufferGetBaseAddressOfPlane(pixelBuff, 0);
+    yChannel = CVPixelBufferGetBaseAddressOfPlane(pixelBuff, 0);
     
     uint8_t *cbCrChannel = CVPixelBufferGetBaseAddressOfPlane(pixelBuff, 1);
     
-    *cBChannel = (uint8_t *)malloc(planeSizes[1]/2);
-    *cRChannel = (uint8_t *)malloc(planeSizes[1]/2);
+    cBChannel = (uint8_t *)malloc(planeSizes[1]/2);
+    cRChannel = (uint8_t *)malloc(planeSizes[1]/2);
     
     uint8_t *u = cBChannel;
     uint8_t *v = cRChannel;
@@ -139,6 +139,8 @@ enum
     
     CVPixelBufferUnlockBaseAddress(pixelBuff, 0);
     
+    [self setupTextures];
+    [self render];
 }
 
 - (void)setupAVCapture
@@ -226,7 +228,7 @@ enum
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_LUMINANCE,
-                 planeBPRs[0],
+                 planeWidths[0],
                  planeHeights[0],
                  0,
                  GL_LUMINANCE,
@@ -250,7 +252,7 @@ enum
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_LUMINANCE,
-                 planeBPRs[1]/2,
+                 planeWidths[1]/2,
                  planeHeights[1]/2,
                  0,
                  GL_LUMINANCE,
@@ -274,7 +276,7 @@ enum
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_LUMINANCE,
-                 planeBPRs[1]/2,
+                 planeWidths[1]/2,
                  planeHeights[1]/2,
                  0,
                  GL_LUMINANCE,
@@ -320,7 +322,7 @@ enum
     *shader = glCreateShader(type);
     glShaderSource(*shader, 1, &source, NULL);
     glCompileShader(*shader);
-    
+/*
 #if defined(DEBUG)
     GLint loglength;
     glGetShaderiv(*shader, loglength, &loglength);
@@ -332,7 +334,7 @@ enum
         free(log);
     }
 #endif
-    
+*/
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
     
     if (status == 0) {
@@ -407,7 +409,7 @@ enum
 {
     GLint status;
     glLinkProgram(prog);
-    
+/*
 #if defined(DEBUG)
     GLint logLength;
     glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logLength);
@@ -419,7 +421,7 @@ enum
         free(log);
     }
 #endif
-    
+*/    
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
     
     if (status == 0) {
@@ -441,7 +443,7 @@ enum
                     0,
                     0,
                     0,
-                    planeBPRs[0],            // source width
+                    planeWidths[0],            // source width
                     planeHeights[0],            // source height
                     GL_LUMINANCE,
                     GL_UNSIGNED_BYTE,
@@ -457,7 +459,7 @@ enum
                     0,
                     0,
                     0,
-                    planeBPRs[1]/2,            // source width
+                    planeWidths[1]/2,            // source width
                     planeHeights[1]/2,            // source height
                     GL_LUMINANCE,
                     GL_UNSIGNED_BYTE,
@@ -474,7 +476,7 @@ enum
                     0,
                     0,
                     0,
-                    planeBPRs[1]/2,            // source width
+                    planeWidths[1]/2,            // source width
                     planeHeights[1]/2,            // source height
                     GL_LUMINANCE,
                     GL_UNSIGNED_BYTE,
